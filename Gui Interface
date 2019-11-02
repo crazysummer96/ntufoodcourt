@@ -1,0 +1,142 @@
+import tkinter as tk
+from datetime import date, time
+import sys
+import os
+"""from tkinter import tkfronts"""
+
+LARGE_FONT= ("Verdana", 15)
+
+
+class Guiinterface(tk.Tk):
+
+    def __init__(self, *args, **kwargs):
+        
+        tk.Tk.__init__(self, *args, **kwargs)
+        self.title("Menu Inteface")
+        self.resizable(1,1)
+        container = tk.Frame(self)
+        self.geometry("250x250")
+        self.maxsize(350,350)
+        container.pack(side="top", fill="both", expand = True)
+
+        container.grid_rowconfigure(0, weight=1)
+        container.grid_columnconfigure(0, weight=1)
+
+        self.frames = {}
+
+        for F in (StartPage, PageOne, PageTwo,PageThree):
+
+            frame = F(container, self)
+
+            self.frames[F] = frame
+
+            frame.grid(row=0, column=0, sticky="nsew")
+
+        self.show_frame(StartPage)
+
+    def show_frame(self, cont):
+
+        frame = self.frames[cont]
+        frame.tkraise()
+
+        
+class StartPage(tk.Frame):
+    """ First Page to Be shown"""
+
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self,parent)
+        
+
+        label = tk.Label(self, text="Welcome to \n Northspine FoodCourt \n Menu System",bg="yellow", font=LARGE_FONT)
+        label.pack(pady=10,padx=10,fill="x")
+
+        button = tk.Button(self, text="Today's Store",
+                            command=lambda: controller.show_frame(PageOne))
+        button.pack(fill="both",expand=1)
+
+        button2 = tk.Button(self,
+                            text="View Later Time",
+                            command=lambda: controller.show_frame(PageTwo)).pack(fill="both",expand=1)
+        button3=tk.Button(self,
+                          text="Quit",
+                          command=lambda:controller.destroy()).pack(fill="x")
+            
+class PageOne(tk.Frame):
+    """Todays Store page"""
+
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        
+        time1 = ''
+        clock = tk.Label(self, font=('times', 20, 'bold'), bg='green')
+        clock.pack(fill="both", expand=0)
+        def tick():
+           
+            # get the current local time from the PC
+            time2 = time.strftime('%H:%M:%S')
+            # if time string has changed, update it
+            clock.config(text=time2)
+            # calls itself every 200 milliseconds
+            # to update the time display as needed
+            # could use >200 ms, but display gets jerky
+            clock.after(200, tick)
+        tick()
+        
+        label = tk.Label(self, text="Today's Store", font=LARGE_FONT)
+        label.pack(pady=10,padx=10)
+
+        button1 = tk.Button(self, text="Home",
+                            command=lambda: controller.show_frame(StartPage)).pack()
+        button2 = tk.Button(self, text="Quit",
+                            command=lambda: controller.destroy()).pack()
+        store1=tk.Button(self,text="Muslim").pack(side="left")
+        store2=tk.Button(self,text="Indian").pack(side="left")
+        store3=tk.Button(self,text="Japanese").pack(side="left")
+        store4=tk.Button(self,text="Western").pack(side="right")
+        store5=tk.Button(self,text="Korean").pack(side="right")
+
+
+class PageTwo(tk.Frame):
+    """Select time Page"""
+    def __init__(self, parent, controller):   
+        tk.Frame.__init__(self, parent)
+        super().__init__(parent)
+        self.hourstr=tk.StringVar(self,'10')
+        self.hour = tk.Spinbox(self,from_=0,to=23,wrap=True,textvariable=self.hourstr,width=2,state="readonly")
+        self.minstr=tk.StringVar(self,'30')
+        self.minstr.trace("w",self.trace_var)
+        self.last_value = ""
+        self.min = tk.Spinbox(self,from_=0,to=59,wrap=True,textvariable=self.minstr,width=2,state="readonly")
+        self.hour.pack()
+        self.min.pack()
+
+    def trace_var():
+        if self.last_value == "59" and self.minstr.get() == "0":
+            self.hourstr.set(int(self.hourstr.get())+1 if self.hourstr.get() !="23" else 0)
+        self.last_value = self.minstr.get()
+        label = tk.Label(self, text="Page Two!!!", font=LARGE_FONT)
+        label.pack(pady=10,padx=10)
+
+        button1 = tk.Button(self, text="Back to Home",
+                            command=lambda: controller.show_frame(StartPage)).pack()
+        button2 = tk.Button(self, text="Page One",
+                            command=lambda: controller.show_frame(PageOne)).pack()
+
+        
+class PageThree(tk.Frame):
+    """Menu Frame"""
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        label = tk.Label(self, text="Page Two!!!", font=LARGE_FONT)
+        label.pack(pady=10,padx=10)
+
+        button1 = tk.Button(self, text="Back to Home",
+                            command=lambda: controller.show_frame(StartPage)).pack()
+
+        button2 = tk.Button(self, text="Page One",
+                            command=lambda: controller.show_frame(PageOne)).pack()
+
+
+if __name__=="__main__":
+    app = Guiinterface()
+    app.mainloop()
