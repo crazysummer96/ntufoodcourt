@@ -1,0 +1,193 @@
+import tkinter as tk
+from tkinter import messagebox
+import time
+import datetime
+from tkcalendar import Calendar, DateEntry
+
+"""from tkinter import tkfronts"""
+
+LARGE_FONT = ("Verdana", 15)
+
+date_time_selected = ""
+class Guiinterface(tk.Tk):
+
+    def __init__(self, *args, **kwargs):
+        tk.Tk.__init__(self, *args, **kwargs)
+        self.title("Menu Inteface")
+        self.resizable(1, 1)
+        container = tk.Frame(self)
+        self.geometry("350x350")
+        self.maxsize(350, 350)
+        container.pack(side="top", fill="both", expand=True)
+        container.grid_rowconfigure(0, weight=1)
+        container.grid_columnconfigure(0, weight=1)
+
+        self.frames = {}
+
+        for F in (StartPage, PageOne, PageTwo, PageThree):
+            frame = F(container, self)
+
+            self.frames[F] = frame
+
+            frame.grid(row=0, column=0, sticky="nsew")
+
+        self.show_frame(StartPage)
+
+    def show_frame(self, cont):
+        frame = self.frames[cont]
+        frame.tkraise()
+
+
+class StartPage(tk.Frame):
+    """ First Page to Be shown"""
+
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        label = tk.Label(self, text="Welcome to \n Northspine FoodCourt \n Menu System", bg="yellow", font=LARGE_FONT)
+        label.pack(pady=10, padx=10, fill="x")
+        button = tk.Button(self, text="Today's Store",
+                           command=lambda: controller.show_frame(PageOne))
+        button.pack(fill="both", expand=1)
+
+        button2 = tk.Button(self,
+                            text="View Later Time",
+                            command=lambda: controller.show_frame(PageTwo)).pack(fill="both", expand=1)
+        button3 = tk.Button(self,
+                            text="Quit",
+                            command=lambda: controller.destroy()).pack(fill="x")
+
+
+class PageOne(tk.Frame):
+    """Todays Store page"""
+
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+
+        time1 = ''
+        clock = tk.Label(self, font=('times', 20, 'bold'), bg='green')
+        clock.pack(fill="both", expand=0)
+
+        def tick():
+            # get the current local time from the PC
+            time2 = time.strftime('%H:%M:%S')
+            # if time string has changed, update it
+            clock.config(text=time2)
+            # calls itself every 200 milliseconds
+            # to update the time display as needed
+            # could use >200 ms, but display gets jerky
+            clock.after(200, tick)
+
+        tick()
+
+        label = tk.Label(self, text="Today's Store", font=LARGE_FONT)
+        label.pack(pady=10, padx=10)
+
+        button1 = tk.Button(self, text="Home",
+                            command=lambda: controller.show_frame(StartPage)).pack()
+        button2 = tk.Button(self, text="Quit",
+                            command=lambda: controller.destroy()).pack()
+        store1 = tk.Button(self, text="Muslim").pack(side="left")
+        store2 = tk.Button(self, text="Indian").pack(side="left")
+        store3 = tk.Button(self, text="Japanese").pack(side="left")
+        store4 = tk.Button(self, text="Western").pack(side="right")
+        store5 = tk.Button(self, text="Korean").pack(side="right")
+
+
+class PageTwo(tk.Frame):
+
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        label = tk.Label(self, text="Select a date: ", font=LARGE_FONT)
+        label.pack(pady=10, padx=10)
+
+        def date_picker():
+            def print_sel():
+                global date_time_selected
+                print(cal.selection_get())
+                date_time_selected = cal.selection_get()
+                # cal.see(datetime.date(year=2016, month=2, day=5))
+
+
+            top = tk.Toplevel(self)
+
+            today = datetime.date.today()
+
+            mindate = datetime.date.today()
+            maxdate = today + datetime.timedelta(days=5)
+            print(mindate, maxdate)
+
+            cal = Calendar(top, font="Arial 14", selectmode='day', locale='en_US',
+                           mindate=mindate, maxdate=maxdate, disabledforeground='red',
+                           cursor="hand1", year=2018, month=2, day=5)
+            cal.pack(fill="both", expand=True)
+            tk.Button(top, text="ok", command=print_sel).pack()
+            return cal.selection_get()
+
+        button3 = tk.Button(self, text="Select Date",
+                            command=date_picker).pack()
+
+        label_time = tk.Label(self, text="Select Time: ", font=LARGE_FONT)
+        label_time.place(x=130, y=100)
+
+        data = range(0,24)
+        var = tk.StringVar()
+        var.set(data[0])
+        p = tk.OptionMenu(self, var, *data)
+        # p.grid(row=1, column=0)
+        p.place(x=120, y=175)
+        label_col = tk.Label(self, text=" : ", font=LARGE_FONT)
+        label_col.place(x=175, y=175)
+        data_1 = range(0,60)
+        var_1 = tk.StringVar()
+        var_1.set(data_1[0])
+        p_1 = tk.OptionMenu(self, var_1, *data_1)
+        p_1.place(x=200, y=175)
+        def confirm():
+            # print()
+            global date_time_selected
+            if date_time_selected is "":
+                print('error')
+                messagebox.showerror("Error","Date not Selected!")
+            else:
+                hours = var.get()
+                minutes = var_1.get()
+                if len(hours) <2:
+                    hours = "0"+hours
+                if len(minutes) <2:
+                    minutes = "0"+minutes
+                date = date_time_selected.strftime("%m/%d/%Y")
+                datetime_str = date + " " + hours+":"+minutes+":00"
+                datetime_object = datetime.datetime.strptime(datetime_str, '%d/%m/%Y %H:%M:%S')
+                print(datetime_str)
+                # TODO ADD YOUR CODE HERE AND USE datetime_object or datetime_str
+
+        button_select_time = tk.Button(self, text="Confirm", command=confirm).place(x=130, y=230)
+        # p_1.pack(padx= 10, pady=10)
+        # p_1.grid(row=2, column=0)
+
+
+
+        button1 = tk.Button(self, text="Back to Home",
+                            command=lambda: controller.show_frame(StartPage)).pack(side="bottom")
+        button2 = tk.Button(self, text="Page One",
+                            command=lambda: controller.show_frame(PageOne)).pack(side="bottom")
+
+
+class PageThree(tk.Frame):
+    """Menu Frame that links the store to here"""
+
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        label = tk.Label(self, text="Page Two!!!", font=LARGE_FONT)
+        label.pack(pady=10, padx=10)
+
+        button1 = tk.Button(self, text="Back to Home",
+                            command=lambda: controller.show_frame(StartPage)).pack()
+
+        button2 = tk.Button(self, text="Page One",
+                            command=lambda: controller.show_frame(PageOne)).pack()
+
+
+if __name__ == "__main__":
+    app = Guiinterface()
+    app.mainloop()
